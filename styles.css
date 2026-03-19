@@ -1,0 +1,125 @@
+/* ==========================================================================
+   styles.css — UXP Premiere Pro Panel
+   Usa apenas propriedades CSS seguras no runtime UXP:
+   - Flexbox: suportado
+   - Variáveis CSS: suportadas
+   - ::before / ::after: evitados (bugs em alguns builds UXP)
+   - position: fixed: evitado
+   ========================================================================== */
+
+/* Reset mínimo — UXP não herda estilos de browser */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: #1e1e1e;
+  color: #d4d4d4;
+  font-family: Adobe Clean, sans-serif;
+  font-size: 13px;
+}
+
+/* --------------------------------------------------------------------------
+   Layout principal
+   -------------------------------------------------------------------------- */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 16px;
+  gap: 12px;
+}
+
+/* --------------------------------------------------------------------------
+   Título
+   -------------------------------------------------------------------------- */
+
+.title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 4px;
+}
+
+/* --------------------------------------------------------------------------
+   Botão
+   UXP: evitar :focus-visible e outline complexos (suporte variável)
+   -------------------------------------------------------------------------- */
+
+.btn {
+  background-color: #2d7dd2;
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 14px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background-color: #3a8ee6;
+}
+
+.btn:active {
+  background-color: #1f5fa3;
+}
+
+.btn:disabled {
+  background-color: #3a3a3a;
+  color: #888888;
+  cursor: default;
+}
+
+/* --------------------------------------------------------------------------
+   Área de resultado
+   -------------------------------------------------------------------------- */
+
+.result {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background-color: #2a2a2a;
+  border-left: 3px solid #2d7dd2;
+  border-radius: 3px;
+  padding: 10px 12px;
+}
+
+.result__label {
+  font-size: 11px;
+  text-transform: uppercase;
+  color: #888888;
+  letter-spacing: 0.5px;
+}
+
+.result__value {
+  font-size: 14px;
+  color: #ffffff;
+  word-break: break-word;
+}
+
+/* --------------------------------------------------------------------------
+   Área de erro
+   -------------------------------------------------------------------------- */
+
+.error {
+  background-color: #2e1a1a;
+  border-left: 3px solid #d24f4f;
+  border-radius: 3px;
+  padding: 10px 12px;
+  color: #e07070;
+  font-size: 12px;
+  word-break: break-word;
+}
+
+/* --------------------------------------------------------------------------
+   Utilitários de visibilidade
+   UXP suporta display:none para ocultar elementos
+   -------------------------------------------------------------------------- */
+
+.result--hidden,
+.error--hidden {
+  display: none;
+}
