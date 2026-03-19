@@ -2,13 +2,12 @@
   "id": "com.example.premiere-simple-panel",
   "name": "Simple Panel",
   "version": "1.0.0",
+  "main": "index.html",
   "manifestVersion": 5,
-  "host": [
-    {
-      "app": "PPRO",
-      "minVersion": "22.0"
-    }
-  ],
+  "host": {
+    "app": "premierepro",
+    "minVersion": "26.0.2"
+  },
   "entrypoints": [
     {
       "type": "panel",
