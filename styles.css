@@ -1,13 +1,13 @@
 /* ==========================================================================
-   styles.css — UXP Premiere Pro Panel
-   Usa apenas propriedades CSS seguras no runtime UXP:
-   - Flexbox: suportado
-   - Variáveis CSS: suportadas
-   - ::before / ::after: evitados (bugs em alguns builds UXP)
-   - position: fixed: evitado
+   styles.css — Rough Cut Generator UXP Panel
+   UXP CSS notes:
+   - Flexbox: supported
+   - CSS variables: supported
+   - ::before / ::after: avoid (buggy in some UXP builds)
+   - position: fixed: avoid
+   - Scrolling: use overflow-y: auto on the container
    ========================================================================== */
 
-/* Reset mínimo — UXP não herda estilos de browser */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -18,108 +18,562 @@ body {
   background-color: #1e1e1e;
   color: #d4d4d4;
   font-family: Adobe Clean, sans-serif;
-  font-size: 13px;
+  font-size: 12px;
+  overflow-y: auto;
 }
 
 /* --------------------------------------------------------------------------
-   Layout principal
+   App shell
    -------------------------------------------------------------------------- */
 
-.container {
+.app {
   display: flex;
   flex-direction: column;
-  align-items: stretch;
-  padding: 16px;
-  gap: 12px;
+  min-height: 100vh;
+  padding-bottom: 56px; /* space for fixed nav footer */
 }
 
 /* --------------------------------------------------------------------------
-   Título
+   Header
    -------------------------------------------------------------------------- */
 
-.title {
-  font-size: 15px;
-  font-weight: 600;
+.header {
+  background-color: #2a2a2a;
+  border-bottom: 1px solid #3a3a3a;
+  padding: 10px 14px 8px;
+}
+
+.header__title {
+  font-size: 14px;
+  font-weight: 700;
   color: #ffffff;
-  margin-bottom: 4px;
+  letter-spacing: 0.3px;
+}
+
+.header__sub {
+  font-size: 11px;
+  color: #888888;
+  margin-top: 2px;
 }
 
 /* --------------------------------------------------------------------------
-   Botão
-   UXP: evitar :focus-visible e outline complexos (suporte variável)
+   Steps navigation
+   -------------------------------------------------------------------------- */
+
+.steps-nav {
+  display: flex;
+  align-items: center;
+  padding: 10px 14px 0;
+}
+
+.steps-nav__item {
+  width: 24px;
+  height: 24px;
+  border-radius: 12px;
+  background-color: #3a3a3a;
+  color: #888888;
+  font-size: 11px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.steps-nav__item.active {
+  background-color: #2d7dd2;
+  color: #ffffff;
+}
+
+.steps-nav__item.done {
+  background-color: #2a5a2a;
+  color: #6fcf6f;
+}
+
+.steps-nav__line {
+  flex: 1;
+  height: 2px;
+  background-color: #3a3a3a;
+  margin: 0 3px;
+}
+
+.steps-nav__labels {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 14px 8px;
+  color: #666666;
+  font-size: 10px;
+}
+
+/* --------------------------------------------------------------------------
+   Steps body
+   -------------------------------------------------------------------------- */
+
+.steps-body {
+  flex: 1;
+  padding: 0 14px;
+}
+
+.step-panel {
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 0;
+}
+
+.step-panel.active {
+  display: flex;
+}
+
+.step-panel__title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.step-panel__hint {
+  font-size: 11px;
+  color: #888888;
+  line-height: 1.4;
+}
+
+/* --------------------------------------------------------------------------
+   Buttons
    -------------------------------------------------------------------------- */
 
 .btn {
-  background-color: #2d7dd2;
-  color: #ffffff;
   border: none;
   border-radius: 4px;
-  padding: 8px 14px;
-  font-size: 13px;
+  padding: 7px 12px;
+  font-size: 12px;
   cursor: pointer;
+  font-family: inherit;
 }
 
-.btn:hover {
+.btn--primary {
+  background-color: #2d7dd2;
+  color: #ffffff;
+}
+
+.btn--primary:hover {
   background-color: #3a8ee6;
 }
 
-.btn:active {
+.btn--primary:active {
   background-color: #1f5fa3;
+}
+
+.btn--secondary {
+  background-color: #3a3a3a;
+  color: #d4d4d4;
+  border: 1px solid #555555;
+}
+
+.btn--secondary:hover {
+  background-color: #444444;
+}
+
+.btn--ghost {
+  background-color: transparent;
+  color: #888888;
+  border: 1px solid #444444;
+}
+
+.btn--ghost:hover {
+  color: #d4d4d4;
+  border-color: #666666;
+}
+
+.btn--generate {
+  background-color: #27ae60;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 10px 14px;
+}
+
+.btn--generate:hover {
+  background-color: #2ecc71;
+}
+
+.btn--generate:disabled {
+  background-color: #2a3a2a;
+  color: #558855;
+  cursor: default;
+}
+
+.btn--block {
+  width: 100%;
+  text-align: center;
 }
 
 .btn:disabled {
   background-color: #3a3a3a;
-  color: #888888;
+  color: #666666;
   cursor: default;
 }
 
 /* --------------------------------------------------------------------------
-   Área de resultado
+   File items & lists
    -------------------------------------------------------------------------- */
 
-.result {
+.file-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #2a2a2a;
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+  padding: 8px 10px;
+}
+
+.file-item__icon {
+  color: #2d7dd2;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.file-item__name {
+  flex: 1;
+  color: #d4d4d4;
+  word-break: break-all;
+  font-size: 11px;
+}
+
+.file-item__remove {
+  background: none;
+  border: none;
+  color: #666666;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 2px 4px;
+  flex-shrink: 0;
+}
+
+.file-item__remove:hover {
+  color: #e07070;
+}
+
+.file-list {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  background-color: #2a2a2a;
-  border-left: 3px solid #2d7dd2;
-  border-radius: 3px;
-  padding: 10px 12px;
+  max-height: 160px;
+  overflow-y: auto;
 }
 
-.result__label {
+.file-list-entry {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #252525;
+  border-radius: 3px;
+  padding: 5px 8px;
+  font-size: 11px;
+  color: #b0b0b0;
+}
+
+.file-list-entry__num {
+  color: #555555;
+  min-width: 18px;
+  font-size: 10px;
+}
+
+.file-list-entry__name {
+  flex: 1;
+  word-break: break-all;
+}
+
+.file-list-entry__remove {
+  background: none;
+  border: none;
+  color: #555555;
+  cursor: pointer;
+  font-size: 11px;
+  padding: 1px 3px;
+}
+
+.file-list-entry__remove:hover {
+  color: #e07070;
+}
+
+.count-badge {
+  font-size: 11px;
+  color: #2d7dd2;
+  text-align: right;
+}
+
+/* --------------------------------------------------------------------------
+   Badge optional
+   -------------------------------------------------------------------------- */
+
+.badge-optional {
+  font-size: 10px;
+  font-weight: 400;
+  color: #888888;
+  background-color: #2a2a2a;
+  border: 1px solid #3a3a3a;
+  border-radius: 3px;
+  padding: 1px 5px;
+}
+
+/* --------------------------------------------------------------------------
+   Toggle checkbox row
+   -------------------------------------------------------------------------- */
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 6px 0;
+}
+
+.toggle-label {
+  color: #d4d4d4;
+  font-size: 12px;
+}
+
+/* --------------------------------------------------------------------------
+   Radio cards (duration)
+   -------------------------------------------------------------------------- */
+
+.radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.radio-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: #252525;
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+  padding: 8px 10px;
+  cursor: pointer;
+}
+
+.radio-card input[type="radio"] {
+  flex-shrink: 0;
+}
+
+.radio-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.radio-card__title {
+  font-size: 12px;
+  color: #d4d4d4;
+  font-weight: 500;
+}
+
+.radio-card__desc {
+  font-size: 10px;
+  color: #888888;
+}
+
+/* --------------------------------------------------------------------------
+   Rhythm cards
+   -------------------------------------------------------------------------- */
+
+.rhythm-group {
+  display: flex;
+  gap: 6px;
+}
+
+.rhythm-card {
+  flex: 1;
+  cursor: pointer;
+}
+
+.rhythm-card input[type="radio"] {
+  display: none;
+}
+
+.rhythm-card__body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background-color: #252525;
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+  padding: 10px 6px;
+}
+
+.rhythm-card input[type="radio"]:checked + .rhythm-card__body {
+  border-color: #2d7dd2;
+  background-color: #1a2d45;
+}
+
+.rhythm-card__icon {
+  font-size: 18px;
+  color: #888888;
+}
+
+.rhythm-card input[type="radio"]:checked + .rhythm-card__body .rhythm-card__icon {
+  color: #2d7dd2;
+}
+
+.rhythm-card__name {
+  font-size: 12px;
+  color: #d4d4d4;
+  font-weight: 600;
+}
+
+.rhythm-card__range {
+  font-size: 10px;
+  color: #888888;
+}
+
+/* --------------------------------------------------------------------------
+   Extras section
+   -------------------------------------------------------------------------- */
+
+.extras-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border-top: 1px solid #3a3a3a;
+  padding-top: 10px;
+  margin-top: 4px;
+}
+
+.extras-section__title {
   font-size: 11px;
   text-transform: uppercase;
-  color: #888888;
+  color: #666666;
   letter-spacing: 0.5px;
 }
 
-.result__value {
-  font-size: 14px;
-  color: #ffffff;
-  word-break: break-word;
+.extra-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 2px 0;
+  color: #b0b0b0;
+  font-size: 12px;
+}
+
+.extra-sub {
+  padding-left: 20px;
+}
+
+.text-input {
+  width: 100%;
+  background-color: #2a2a2a;
+  border: 1px solid #444444;
+  border-radius: 3px;
+  color: #d4d4d4;
+  font-size: 12px;
+  padding: 6px 8px;
+  font-family: inherit;
+}
+
+.text-input:focus {
+  border-color: #2d7dd2;
+  outline: none;
 }
 
 /* --------------------------------------------------------------------------
-   Área de erro
+   Summary box (step 6)
    -------------------------------------------------------------------------- */
 
-.error {
+.summary-box {
+  background-color: #252525;
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+  padding: 10px 12px;
+  font-size: 11px;
+  color: #b0b0b0;
+  line-height: 1.8;
+}
+
+.summary-box strong {
+  color: #ffffff;
+}
+
+/* --------------------------------------------------------------------------
+   Progress bar
+   -------------------------------------------------------------------------- */
+
+.progress-track {
+  height: 4px;
+  background-color: #3a3a3a;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  background-color: #2d7dd2;
+  border-radius: 2px;
+  transition: width 0.3s;
+}
+
+.progress-text {
+  font-size: 11px;
+  color: #888888;
+  margin-top: 6px;
+  text-align: center;
+}
+
+/* --------------------------------------------------------------------------
+   Feedback messages
+   -------------------------------------------------------------------------- */
+
+.feedback {
+  border-radius: 4px;
+  padding: 10px 12px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.feedback--success {
+  background-color: #1a2e1a;
+  border-left: 3px solid #27ae60;
+  color: #6fcf6f;
+}
+
+.feedback--error {
   background-color: #2e1a1a;
   border-left: 3px solid #d24f4f;
-  border-radius: 3px;
-  padding: 10px 12px;
   color: #e07070;
-  font-size: 12px;
-  word-break: break-word;
 }
 
 /* --------------------------------------------------------------------------
-   Utilitários de visibilidade
-   UXP suporta display:none para ocultar elementos
+   Bottom nav footer
    -------------------------------------------------------------------------- */
 
-.result--hidden,
-.error--hidden {
+.nav-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  background-color: #242424;
+  border-top: 1px solid #3a3a3a;
+  position: sticky;
+  bottom: 0;
+}
+
+.nav-footer__label {
+  font-size: 11px;
+  color: #666666;
+}
+
+/* --------------------------------------------------------------------------
+   Utilities
+   -------------------------------------------------------------------------- */
+
+.hidden {
   display: none;
 }
