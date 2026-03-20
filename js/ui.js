@@ -187,15 +187,33 @@ function updateMusicUI() {
 // ---------------------------------------------------------------------------
 
 async function pickFile(types) {
-  return localFileSystem.getFileForOpening({ types });
+  try {
+    const file = await localFileSystem.getFileForOpening({ types });
+    return file;
+  } catch (err) {
+    // Permissão negada ou diálogo cancelado
+    Log.error('File picker falhou: ' + err.message);
+    // Mostra erro inline no step 1
+    showStepError(1, 'Não foi possível abrir o seletor de arquivos: ' + err.message +
+      '. Verifique se o plugin tem permissão "localFileSystem" no manifest.');
+    return null;
+  }
 }
 
 async function pickFiles(types) {
-  if (localFileSystem.getFilesForOpening) {
-    return localFileSystem.getFilesForOpening({ allowMultiple: true, types });
+  try {
+    if (localFileSystem.getFilesForOpening) {
+      const files = await localFileSystem.getFilesForOpening({ allowMultiple: true, types });
+      return files || [];
+    }
+    const f = await localFileSystem.getFileForOpening({ types });
+    return f ? [f] : [];
+  } catch (err) {
+    Log.error('File picker (multi) falhou: ' + err.message);
+    showStepError(1, 'Não foi possível abrir o seletor de arquivos: ' + err.message +
+      '. Verifique se o plugin tem permissão "localFileSystem" no manifest.');
+    return [];
   }
-  const f = await localFileSystem.getFileForOpening({ types });
-  return f ? [f] : [];
 }
 
 // ---------------------------------------------------------------------------

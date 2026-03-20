@@ -1,21 +1,24 @@
 {
-  "id": "com.example.premiere-simple-panel",
-  "name": "Simple Panel",
-  "version": "1.0.0",
+  "id": "com.example.autorecap",
+  "name": "AutoRecap",
+  "version": "2.0.0",
   "main": "index.html",
   "manifestVersion": 5,
   "host": {
     "app": "premierepro",
     "minVersion": "26.0.2"
   },
+  "requiredPermissions": {
+    "localFileSystem": "request"
+  },
   "entrypoints": [
     {
       "type": "panel",
       "id": "mainPanel",
-      "label": { "default": "Simple Panel" },
+      "label": { "default": "AutoRecap" },
       "main": "index.html",
-      "minimumSize": { "width": 200, "height": 120 },
-      "preferredDockedSize": { "width": 300, "height": 300 },
+      "minimumSize": { "width": 280, "height": 400 },
+      "preferredDockedSize": { "width": 360, "height": 600 },
       "maximumSize": { "width": 2000, "height": 2000 }
     }
   ]
