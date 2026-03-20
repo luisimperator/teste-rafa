@@ -2,210 +2,397 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <title>Rough Cut Generator</title>
+    <title>AutoRecap</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <div class="app">
 
-      <!-- Header -->
-      <div class="header">
-        <div class="header__title">Rough Cut Generator</div>
-        <div class="header__sub">Aftermovie automático</div>
-      </div>
+      <!-- ================================================================
+           HEADER
+           ================================================================ -->
+      <header class="app-header">
+        <div class="app-header__brand">
+          <span class="app-header__logo">&#9654;</span>
+          <span class="app-header__name">AutoRecap</span>
+        </div>
+        <span class="app-header__tag">rough cut generator</span>
+      </header>
 
-      <!-- Steps indicator -->
-      <div class="steps-nav">
-        <div class="steps-nav__item active" data-step="1">1</div>
-        <div class="steps-nav__line"></div>
-        <div class="steps-nav__item" data-step="2">2</div>
-        <div class="steps-nav__line"></div>
-        <div class="steps-nav__item" data-step="3">3</div>
-        <div class="steps-nav__line"></div>
-        <div class="steps-nav__item" data-step="4">4</div>
-        <div class="steps-nav__line"></div>
-        <div class="steps-nav__item" data-step="5">5</div>
-        <div class="steps-nav__line"></div>
-        <div class="steps-nav__item" data-step="6">6</div>
-      </div>
-      <div class="steps-nav__labels">
-        <span>Música</span>
-        <span>B-Roll</span>
-        <span>Entrev.</span>
-        <span>Duração</span>
-        <span>Ritmo</span>
-        <span>Gerar</span>
-      </div>
-
-      <!-- Step panels -->
-      <div class="steps-body">
-
-        <!-- STEP 1: Music -->
-        <div id="step-1" class="step-panel active">
-          <div class="step-panel__title">Selecione a música</div>
-          <div class="step-panel__hint">Arquivo de áudio principal do aftermovie</div>
-          <button id="btn-select-music" class="btn btn--primary btn--block">
-            + Selecionar música
-          </button>
-          <div id="music-info" class="file-item hidden">
-            <span class="file-item__icon">&#9834;</span>
-            <span id="music-name" class="file-item__name"></span>
-            <button id="btn-remove-music" class="file-item__remove">&#10005;</button>
+      <!-- ================================================================
+           STEP INDICATOR
+           ================================================================ -->
+      <nav class="step-nav">
+        <div class="step-nav__track">
+          <div class="step-dot active" data-step="1">
+            <span class="step-dot__num">1</span>
+            <span class="step-dot__label">Mídia</span>
+          </div>
+          <div class="step-nav__line"></div>
+          <div class="step-dot" data-step="2">
+            <span class="step-dot__num">2</span>
+            <span class="step-dot__label">Análise</span>
+          </div>
+          <div class="step-nav__line"></div>
+          <div class="step-dot" data-step="3">
+            <span class="step-dot__num">3</span>
+            <span class="step-dot__label">Config.</span>
+          </div>
+          <div class="step-nav__line"></div>
+          <div class="step-dot" data-step="4">
+            <span class="step-dot__num">4</span>
+            <span class="step-dot__label">Gerar</span>
           </div>
         </div>
+      </nav>
 
-        <!-- STEP 2: B-Roll -->
-        <div id="step-2" class="step-panel">
-          <div class="step-panel__title">Clipes B-Roll</div>
-          <div class="step-panel__hint">Selecione os vídeos que serão distribuídos na timeline</div>
-          <button id="btn-select-broll" class="btn btn--primary btn--block">
-            + Adicionar clipes
-          </button>
-          <div id="broll-list" class="file-list"></div>
-          <div id="broll-count" class="count-badge hidden"></div>
-        </div>
+      <!-- ================================================================
+           PANELS
+           ================================================================ -->
+      <main class="panels">
 
-        <!-- STEP 3: Interviews -->
-        <div id="step-3" class="step-panel">
-          <div class="step-panel__title">
-            Entrevistas
-            <span class="badge-optional">opcional</span>
-          </div>
-          <div class="step-panel__hint">Clipes de entrevistas intercalados no corte</div>
-          <label class="toggle-row">
-            <input type="checkbox" id="chk-interviews" />
-            <span class="toggle-label">Incluir entrevistas</span>
-          </label>
-          <div id="interview-section" class="hidden">
-            <button id="btn-select-interviews" class="btn btn--secondary btn--block">
-              + Selecionar entrevistas
+        <!-- ============================================================
+             STEP 1 — MÍDIA
+             ============================================================ -->
+        <section id="step-1" class="step-panel active">
+
+          <!-- Música -->
+          <div class="media-block">
+            <div class="media-block__header">
+              <span class="media-block__icon">&#9834;</span>
+              <span class="media-block__title">Música principal</span>
+              <span class="media-block__req">obrigatório</span>
+            </div>
+            <button id="btn-select-music" class="btn btn--outline btn--sm btn--block">
+              + Selecionar arquivo de áudio
             </button>
-            <div id="interview-list" class="file-list"></div>
-            <div id="interview-count" class="count-badge hidden"></div>
-          </div>
-        </div>
-
-        <!-- STEP 4: Duration -->
-        <div id="step-4" class="step-panel">
-          <div class="step-panel__title">Duração final</div>
-          <div class="step-panel__hint">Quanto tempo vai durar o aftermovie?</div>
-          <div class="radio-group">
-            <label class="radio-card">
-              <input type="radio" name="duration" value="match" checked />
-              <div class="radio-card__body">
-                <span class="radio-card__title">Seguir música</span>
-                <span class="radio-card__desc">Duração completa do áudio</span>
+            <div id="music-info" class="music-card hidden">
+              <span class="music-card__icon">&#9834;</span>
+              <div class="music-card__info">
+                <span id="music-name" class="music-card__name"></span>
+                <span id="music-size" class="music-card__meta"></span>
               </div>
-            </label>
-            <label class="radio-card">
-              <input type="radio" name="duration" value="60" />
-              <div class="radio-card__body">
-                <span class="radio-card__title">1 minuto</span>
-              </div>
-            </label>
-            <label class="radio-card">
-              <input type="radio" name="duration" value="120" />
-              <div class="radio-card__body">
-                <span class="radio-card__title">2 minutos</span>
-              </div>
-            </label>
-            <label class="radio-card">
-              <input type="radio" name="duration" value="180" />
-              <div class="radio-card__body">
-                <span class="radio-card__title">3 minutos</span>
-              </div>
-            </label>
-            <label class="radio-card">
-              <input type="radio" name="duration" value="300" />
-              <div class="radio-card__body">
-                <span class="radio-card__title">5 minutos</span>
-              </div>
-            </label>
-          </div>
-        </div>
-
-        <!-- STEP 5: Rhythm + Extras -->
-        <div id="step-5" class="step-panel">
-          <div class="step-panel__title">Ritmo do corte</div>
-          <div class="step-panel__hint">Define a duração média de cada clipe na timeline</div>
-          <div class="rhythm-group">
-            <label class="rhythm-card">
-              <input type="radio" name="rhythm" value="fast" />
-              <div class="rhythm-card__body">
-                <span class="rhythm-card__icon">&#9889;</span>
-                <span class="rhythm-card__name">Rápido</span>
-                <span class="rhythm-card__range">1 – 2.5s</span>
-              </div>
-            </label>
-            <label class="rhythm-card">
-              <input type="radio" name="rhythm" value="medium" checked />
-              <div class="rhythm-card__body">
-                <span class="rhythm-card__icon">&#9654;</span>
-                <span class="rhythm-card__name">Médio</span>
-                <span class="rhythm-card__range">2.5 – 4.5s</span>
-              </div>
-            </label>
-            <label class="rhythm-card">
-              <input type="radio" name="rhythm" value="slow" />
-              <div class="rhythm-card__body">
-                <span class="rhythm-card__icon">&#126;</span>
-                <span class="rhythm-card__name">Lento</span>
-                <span class="rhythm-card__range">4 – 8s</span>
-              </div>
-            </label>
+              <button id="btn-remove-music" class="icon-btn" title="Remover">&#10005;</button>
+            </div>
           </div>
 
-          <div class="extras-section">
-            <div class="extras-section__title">Extras</div>
-            <label class="extra-row">
-              <input type="checkbox" id="chk-title-card" />
-              <span>Cartela de título (marker)</span>
-            </label>
-            <div id="title-input-row" class="extra-sub hidden">
-              <input type="text" id="input-title-text" class="text-input"
+          <!-- B-Roll -->
+          <div class="media-block">
+            <div class="media-block__header">
+              <span class="media-block__icon">&#9646;</span>
+              <span class="media-block__title">Clipes B-Roll</span>
+              <span class="media-block__req">obrigatório</span>
+              <span id="broll-count" class="count-pill hidden"></span>
+            </div>
+            <button id="btn-select-broll" class="btn btn--outline btn--sm btn--block">
+              + Adicionar clipes
+            </button>
+            <div id="broll-list" class="flist"></div>
+          </div>
+
+          <!-- Entrevistas -->
+          <div class="media-block">
+            <div class="media-block__header">
+              <label class="toggle-label">
+                <input type="checkbox" id="chk-interviews" class="toggle-input" />
+                <span class="toggle-track"></span>
+                <span class="media-block__title">Entrevistas / falas</span>
+              </label>
+              <span class="media-block__req opt">opcional</span>
+              <span id="interview-count" class="count-pill hidden"></span>
+            </div>
+            <div id="interview-section" class="hidden">
+              <button id="btn-select-interviews" class="btn btn--outline btn--sm btn--block">
+                + Selecionar entrevistas
+              </button>
+              <div id="interview-list" class="flist"></div>
+            </div>
+          </div>
+
+          <!-- Assets gráficos -->
+          <div class="media-block">
+            <div class="media-block__header">
+              <label class="toggle-label">
+                <input type="checkbox" id="chk-assets" class="toggle-input" />
+                <span class="toggle-track"></span>
+                <span class="media-block__title">Assets gráficos</span>
+              </label>
+              <span class="media-block__req opt">opcional</span>
+              <span id="asset-count" class="count-pill hidden"></span>
+            </div>
+            <div id="asset-section" class="hidden">
+              <div class="ph-notice">Importação suportada. Inserção automática é placeholder — posicione manualmente após gerar.</div>
+              <button id="btn-select-assets" class="btn btn--outline btn--sm btn--block">
+                + Logo, título, lower thirds
+              </button>
+              <div id="asset-list" class="flist"></div>
+            </div>
+          </div>
+
+          <!-- Total badge -->
+          <div id="media-total-badge" class="total-badge hidden"></div>
+
+        </section>
+
+        <!-- ============================================================
+             STEP 2 — ANÁLISE
+             ============================================================ -->
+        <section id="step-2" class="step-panel">
+
+          <div class="analysis-header">
+            <div id="analysis-status" class="analysis-status analysis-status--idle">
+              Aguardando análise
+            </div>
+          </div>
+
+          <!-- Card de música -->
+          <div id="analysis-music-card" class="acard">
+            <div class="acard-icon">&#9834;</div>
+            <div class="acard-body">
+              <div class="acard-name">—</div>
+              <div class="acard-meta">selecione a música na etapa anterior</div>
+            </div>
+          </div>
+
+          <!-- BPM -->
+          <div class="bpm-block">
+            <div class="bpm-block__header">
+              <span class="bpm-block__label">BPM</span>
+              <span id="beat-interval" class="bpm-block__meta">0.50s / beat</span>
+            </div>
+            <div class="bpm-row">
+              <span id="bpm-display" class="bpm-display">120</span>
+              <input id="bpm-input" type="number" class="bpm-input" value="120" min="40" max="240" />
+            </div>
+            <input id="bpm-slider" type="range" class="bpm-slider" min="40" max="240" step="1" value="120" />
+            <div class="bpm-hints">
+              <span>40</span><span>Trap ~70</span><span>Pop ~120</span><span>EDM ~130</span><span>240</span>
+            </div>
+            <button id="btn-analyze" class="btn btn--gold btn--block">
+              &#9654; Auto-detectar BPM
+              <span class="ph-tag">SIMULADO</span>
+            </button>
+            <div class="ph-notice">
+              Auto-detecção retorna 120 BPM. Ajuste manualmente conforme a música.
+            </div>
+          </div>
+
+          <!-- Resumo de mídia -->
+          <div class="acard acard--counts">
+            <div class="acard-icon">&#9646;</div>
+            <div class="acard-body">
+              <div id="analysis-clips-count" class="acard-name">—</div>
+              <div class="acard-meta">clipes carregados</div>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ============================================================
+             STEP 3 — CONFIGURAÇÃO
+             ============================================================ -->
+        <section id="step-3" class="step-panel">
+
+          <!-- Duração -->
+          <div class="cfg-block">
+            <div class="cfg-block__title">Duração final</div>
+            <div class="pill-group">
+              <label class="pill"><input type="radio" name="cfg-duration" value="15" /><span>15s</span></label>
+              <label class="pill"><input type="radio" name="cfg-duration" value="30" /><span>30s</span></label>
+              <label class="pill"><input type="radio" name="cfg-duration" value="45" /><span>45s</span></label>
+              <label class="pill"><input type="radio" name="cfg-duration" value="60" checked /><span>1min</span></label>
+              <label class="pill"><input type="radio" name="cfg-duration" value="90" /><span>1m30</span></label>
+              <label class="pill"><input type="radio" name="cfg-duration" value="120" /><span>2min</span></label>
+              <label class="pill"><input type="radio" name="cfg-duration" value="180" /><span>3min</span></label>
+              <label class="pill"><input type="radio" name="cfg-duration" value="300" /><span>5min</span></label>
+            </div>
+            <div id="custom-duration-row" class="cfg-sub hidden">
+              <input id="input-custom-duration" type="number" class="text-input"
+                     placeholder="Segundos" min="5" max="3600" />
+            </div>
+          </div>
+
+          <!-- Formato -->
+          <div class="cfg-block">
+            <div class="cfg-block__title">
+              Formato
+              <span class="ph-tag">PLACEHOLDER</span>
+            </div>
+            <div class="pill-group">
+              <label class="pill"><input type="radio" name="cfg-format" value="16:9" checked /><span>16:9</span></label>
+              <label class="pill"><input type="radio" name="cfg-format" value="9:16" /><span>9:16</span></label>
+              <label class="pill"><input type="radio" name="cfg-format" value="1:1" /><span>1:1</span></label>
+            </div>
+            <div class="ph-notice">Sequência usa o preset padrão do Premiere. Ajuste manualmente se necessário.</div>
+          </div>
+
+          <!-- Ritmo -->
+          <div class="cfg-block">
+            <div class="cfg-block__title">Ritmo de montagem</div>
+            <div class="rhythm-cards">
+              <label class="rcard">
+                <input type="radio" name="cfg-rhythm" value="calmo" />
+                <div class="rcard__body">
+                  <span class="rcard__icon">&#126;</span>
+                  <span class="rcard__name">Calmo</span>
+                  <span class="rcard__range">2.5 – 8s</span>
+                </div>
+              </label>
+              <label class="rcard">
+                <input type="radio" name="cfg-rhythm" value="equilibrado" checked />
+                <div class="rcard__body">
+                  <span class="rcard__icon">&#9654;</span>
+                  <span class="rcard__name">Equilibrado</span>
+                  <span class="rcard__range">1 – 5s</span>
+                </div>
+              </label>
+              <label class="rcard">
+                <input type="radio" name="cfg-rhythm" value="energetico" />
+                <div class="rcard__body">
+                  <span class="rcard__icon">&#9889;</span>
+                  <span class="rcard__name">Energético</span>
+                  <span class="rcard__range">0.5 – 2.5s</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Frequência de cortes -->
+          <div class="cfg-block">
+            <div class="cfg-block__title">Frequência de cortes</div>
+            <div class="pill-group">
+              <label class="pill"><input type="radio" name="cfg-freq" value="baixa" /><span>Baixa</span></label>
+              <label class="pill"><input type="radio" name="cfg-freq" value="media" checked /><span>Média</span></label>
+              <label class="pill"><input type="radio" name="cfg-freq" value="alta" /><span>Alta</span></label>
+            </div>
+          </div>
+
+          <!-- Extras -->
+          <div class="cfg-block">
+            <div class="cfg-block__title">Extras</div>
+
+            <div class="extra-toggle-row">
+              <label class="toggle-label">
+                <input type="checkbox" id="chk-use-interviews" class="toggle-input" />
+                <span class="toggle-track"></span>
+                Incluir entrevistas na montagem
+              </label>
+            </div>
+
+            <div class="extra-toggle-row">
+              <label class="toggle-label">
+                <input type="checkbox" id="chk-title-card" class="toggle-input" />
+                <span class="toggle-track"></span>
+                Title card inicial
+                <span class="ph-tag">marker</span>
+              </label>
+            </div>
+            <div id="title-text-row" class="cfg-sub hidden">
+              <input id="input-title-text" type="text" class="text-input"
                      placeholder="Nome do evento" />
             </div>
-            <label class="extra-row">
-              <input type="checkbox" id="chk-end-card" />
-              <span>Cartela final (marker)</span>
-            </label>
-            <div id="end-input-row" class="extra-sub hidden">
-              <input type="text" id="input-end-text" class="text-input"
+
+            <div class="extra-toggle-row">
+              <label class="toggle-label">
+                <input type="checkbox" id="chk-end-card" class="toggle-input" />
+                <span class="toggle-track"></span>
+                Cartela final
+                <span class="ph-tag">marker</span>
+              </label>
+            </div>
+            <div id="end-text-row" class="cfg-sub hidden">
+              <input id="input-end-text" type="text" class="text-input"
                      placeholder="Texto da cartela final" />
             </div>
-          </div>
-        </div>
 
-        <!-- STEP 6: Generate -->
-        <div id="step-6" class="step-panel">
-          <div class="step-panel__title">Tudo pronto!</div>
-          <div id="summary" class="summary-box"></div>
-          <button id="btn-generate" class="btn btn--generate btn--block">
-            &#9654; Gerar Rough Cut
+            <div class="extra-toggle-row">
+              <label class="toggle-label">
+                <input type="checkbox" id="chk-section-markers" class="toggle-input" checked />
+                <span class="toggle-track"></span>
+                Markers por seção narrativa
+              </label>
+            </div>
+
+            <div class="extra-toggle-row">
+              <label class="toggle-label">
+                <input type="checkbox" id="chk-media-labels" class="toggle-input" checked />
+                <span class="toggle-track"></span>
+                Labels de cor por tipo de mídia
+              </label>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ============================================================
+             STEP 4 — GERAR
+             ============================================================ -->
+        <section id="step-4" class="step-panel">
+
+          <!-- Resumo -->
+          <div id="generate-summary" class="gen-summary"></div>
+
+          <!-- Botão principal -->
+          <button id="btn-generate" class="btn btn--gold btn--generate">
+            &#9654;&#9654; Gerar Rough Cut
           </button>
+
+          <!-- Progresso -->
           <div id="progress-section" class="hidden">
             <div class="progress-track">
               <div id="progress-fill" class="progress-fill"></div>
             </div>
-            <div id="progress-text" class="progress-text">Iniciando...</div>
+            <div id="progress-text" class="progress-text"></div>
           </div>
-          <div id="success-msg" class="feedback feedback--success hidden">
-            Rough Cut gerado! Verifique a timeline do Premiere Pro.
+
+          <!-- Sucesso -->
+          <div id="generate-success" class="feedback feedback--success hidden">
+            <span class="feedback__icon">&#10003;</span>
+            <div class="feedback__body">
+              <strong>Rough cut gerado!</strong><br />
+              Verifique a timeline do Premiere Pro. Use os markers para encontrar
+              cada seção narrativa.
+            </div>
           </div>
-          <div id="error-msg" class="feedback feedback--error hidden"></div>
-        </div>
 
-      </div><!-- /steps-body -->
+          <!-- Erro -->
+          <div id="generate-error" class="feedback feedback--error hidden"></div>
 
-      <!-- Bottom navigation -->
-      <div class="nav-footer">
-        <button id="btn-back" class="btn btn--ghost">Voltar</button>
-        <span id="step-label" class="nav-footer__label">Passo 1 de 6</span>
-        <button id="btn-next" class="btn btn--primary">Próximo</button>
-      </div>
+          <!-- Log de debug -->
+          <div class="log-header">
+            <span class="log-header__title">Log de debug</span>
+            <button id="btn-toggle-log" class="btn btn--ghost btn--xs">Ver log</button>
+          </div>
+          <div id="log-panel" class="log-panel hidden">
+            <div id="log-container" class="log-container"></div>
+          </div>
+
+        </section>
+
+      </main><!-- /panels -->
+
+      <!-- ================================================================
+           BOTTOM NAV
+           ================================================================ -->
+      <footer class="app-footer">
+        <button id="btn-back" class="btn btn--ghost btn--sm" style="visibility:hidden">
+          &#8592; Voltar
+        </button>
+        <span id="step-label" class="app-footer__label">Passo 1 de 4</span>
+        <button id="btn-next" class="btn btn--primary btn--sm">
+          Próximo &#8594;
+        </button>
+      </footer>
 
     </div><!-- /app -->
 
-    <script src="index.js"></script>
+    <!-- Scripts — carregados em ordem (escopo global compartilhado) -->
+    <script src="js/logger.js"></script>
+    <script src="js/state.js"></script>
+    <script src="js/premiere.js"></script>
+    <script src="js/analysis.js"></script>
+    <script src="js/assembly.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/main.js"></script>
   </body>
 </html>
