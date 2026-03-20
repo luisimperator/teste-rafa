@@ -7,7 +7,13 @@
 
 'use strict';
 
-const { localFileSystem } = require('uxp').storage;
+// localFileSystem carregado com try/catch — pode falhar em alguns ambientes UXP
+let localFileSystem = null;
+try {
+  localFileSystem = require('uxp').storage.localFileSystem;
+} catch (_) {
+  Log.warn('localFileSystem indisponível — use o scan do projeto.');
+}
 
 // ---------------------------------------------------------------------------
 // Helpers DOM
@@ -17,9 +23,10 @@ function $(id) { return document.getElementById(id); }
 function show(id) { const el = $(id); if (el) el.classList.remove('hidden'); }
 function hide(id) { const el = $(id); if (el) el.classList.add('hidden'); }
 
-function getFileName(file) {
-  if (!file) return '';
-  return file.name || file.nativePath.split(/[\\/]/).pop();
+// Funciona com UXP File, ProjectItem ou objeto { name } genérico
+function getFileName(item) {
+  if (!item) return '';
+  return item.name || (item.nativePath ? item.nativePath.split(/[\\/]/).pop() : '?');
 }
 
 // ---------------------------------------------------------------------------
@@ -183,35 +190,150 @@ function updateMusicUI() {
 }
 
 // ---------------------------------------------------------------------------
+// Assign panel — scan do projeto + categorização de itens
+// ---------------------------------------------------------------------------
+
+/**
+ * Renderiza a lista de itens escaneados do projeto.
+ * Cada item recebe botões de papel: Música / B-Roll / Entrevista / Ignorar
+ * @param {Array<{item, name, mediaType}>} scannedItems
+ */
+function renderAssignPanel(scannedItems) {
+  const audioItems = scannedItems.filter((s) => s.mediaType === 'audio');
+  const videoItems = scannedItems.filter((s) => s.mediaType === 'video');
+
+  // Atualiza contadores de seção
+  const ac = $('audio-count'); if (ac) ac.textContent = audioItems.length;
+  const vc = $('video-count'); if (vc) vc.textContent = videoItems.length;
+
+  // Renderiza cada seção
+  _renderAssignSection('audio-items', audioItems);
+  _renderAssignSection('video-items', videoItems);
+
+  audioItems.length > 0 ? show('audio-section') : hide('audio-section');
+  videoItems.length > 0 ? show('video-section') : hide('video-section');
+
+  show('assign-panel');
+  _updateAssignSummary();
+}
+
+function _renderAssignSection(containerId, items) {
+  const container = $(containerId);
+  if (!container) return;
+  container.innerHTML = '';
+
+  items.forEach((scanned) => {
+    const entry = document.createElement('div');
+    entry.className = 'assign-entry';
+    entry.dataset.id = scanned.name; // chave de lookup
+
+    const namEl = document.createElement('span');
+    namEl.className = 'assign-entry__name';
+    namEl.textContent = scanned.name;
+    namEl.title = scanned.name;
+
+    const btns = document.createElement('div');
+    btns.className = 'assign-entry__btns';
+
+    const roles = [
+      { key: 'music',     label: '&#9834; Música',     cls: 'role-btn--music'     },
+      { key: 'broll',     label: '&#9654; B-Roll',     cls: 'role-btn--broll'     },
+      { key: 'interview', label: '&#127908; Entrev.',   cls: 'role-btn--interview' },
+      { key: 'skip',      label: '&#10005; Ignorar',   cls: 'role-btn--skip'      },
+    ];
+
+    roles.forEach(({ key, label, cls }) => {
+      const btn = document.createElement('button');
+      btn.className = 'role-btn ' + cls;
+      btn.innerHTML = label;
+      btn.dataset.role = key;
+      btn.addEventListener('click', () => _assignRole(scanned, key, entry, btns));
+      btns.appendChild(btn);
+    });
+
+    // Auto-sugestão por tipo de mídia
+    if (scanned.mediaType === 'audio' && !AppState.music) {
+      _assignRole(scanned, 'music', entry, btns);
+    } else if (scanned.mediaType === 'video') {
+      _assignRole(scanned, 'broll', entry, btns);
+    }
+
+    entry.appendChild(namEl);
+    entry.appendChild(btns);
+    container.appendChild(entry);
+  });
+}
+
+function _assignRole(scanned, role, entryEl, btnsEl) {
+  // Remove item de todos os slots
+  if (AppState.music === scanned.item) AppState.music = null;
+  AppState.broll     = AppState.broll.filter((x) => x !== scanned.item);
+  AppState.interviews = AppState.interviews.filter((x) => x !== scanned.item);
+
+  // Atribui ao slot correto
+  if (role === 'music') {
+    // Música é única — remove qualquer outro item que estava como música
+    AppState.music = scanned.item;
+  } else if (role === 'broll') {
+    AppState.broll.push(scanned.item);
+  } else if (role === 'interview') {
+    AppState.interviews.push(scanned.item);
+  }
+  // 'skip' = não atribui a nada
+
+  // Atualiza estilos visuais
+  entryEl.className = 'assign-entry' + (role !== 'skip' ? ' assign-entry--active-' + role : '');
+  btnsEl.querySelectorAll('.role-btn').forEach((b) => {
+    b.classList.toggle('active', b.dataset.role === role);
+  });
+
+  _updateAssignSummary();
+  updateMediaBadge();
+}
+
+function _updateAssignSummary() {
+  const musicName = $('sum-music-name');
+  const brollCnt  = $('sum-broll-count');
+  const interCnt  = $('sum-interview-count');
+  if (musicName) musicName.textContent = AppState.music ? getFileName(AppState.music) : '—';
+  if (brollCnt)  brollCnt.textContent  = AppState.broll.length;
+  if (interCnt)  interCnt.textContent  = AppState.interviews.length;
+}
+
+// ---------------------------------------------------------------------------
 // File selection helpers (UXP Storage)
 // ---------------------------------------------------------------------------
 
 async function pickFile(types) {
+  if (!localFileSystem) {
+    showStepError(1, 'File picker indisponível neste ambiente. Use "Escanear painel do projeto" acima.');
+    return null;
+  }
   try {
-    const file = await localFileSystem.getFileForOpening({ types });
-    return file;
+    return await localFileSystem.getFileForOpening({ types });
   } catch (err) {
-    // Permissão negada ou diálogo cancelado
     Log.error('File picker falhou: ' + err.message);
-    // Mostra erro inline no step 1
-    showStepError(1, 'Não foi possível abrir o seletor de arquivos: ' + err.message +
-      '. Verifique se o plugin tem permissão "localFileSystem" no manifest.');
+    showStepError(1, 'File picker falhou: ' + err.message +
+      ' — Use "Escanear painel do projeto" como alternativa.');
     return null;
   }
 }
 
 async function pickFiles(types) {
+  if (!localFileSystem) {
+    showStepError(1, 'File picker indisponível neste ambiente. Use "Escanear painel do projeto" acima.');
+    return [];
+  }
   try {
     if (localFileSystem.getFilesForOpening) {
-      const files = await localFileSystem.getFilesForOpening({ allowMultiple: true, types });
-      return files || [];
+      return (await localFileSystem.getFilesForOpening({ allowMultiple: true, types })) || [];
     }
     const f = await localFileSystem.getFileForOpening({ types });
     return f ? [f] : [];
   } catch (err) {
     Log.error('File picker (multi) falhou: ' + err.message);
-    showStepError(1, 'Não foi possível abrir o seletor de arquivos: ' + err.message +
-      '. Verifique se o plugin tem permissão "localFileSystem" no manifest.');
+    showStepError(1, 'File picker falhou: ' + err.message +
+      ' — Use "Escanear painel do projeto" como alternativa.');
     return [];
   }
 }

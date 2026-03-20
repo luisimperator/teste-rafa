@@ -56,15 +56,71 @@
              ============================================================ -->
         <section id="step-1" class="step-panel active">
 
-          <!-- Música -->
+          <!-- MODO PRIMÁRIO: Scan do painel do projeto -->
           <div class="media-block">
+            <div class="scan-intro">
+              <div class="scan-intro__title">Importe os arquivos no Premiere Pro primeiro</div>
+              <div class="scan-intro__hint">Arquivo &#8594; Importar (ou arraste para o painel Projeto), depois clique abaixo para ler a lista.</div>
+            </div>
+            <button id="btn-scan-project" class="btn btn--gold btn--block">
+              &#8635; Escanear painel do projeto
+            </button>
+            <div id="scan-status" class="scan-status hidden"></div>
+          </div>
+
+          <!-- Lista de itens escaneados para atribuição de papel -->
+          <div id="assign-panel" class="hidden">
+
+            <!-- Resumo de atribuições -->
+            <div id="assign-summary" class="assign-summary">
+              <div class="assign-summary__item">
+                <span class="assign-summary__icon assign-summary__icon--music">&#9834;</span>
+                <span id="sum-music-name" class="assign-summary__name">—</span>
+                <span class="assign-summary__label">música</span>
+              </div>
+              <div class="assign-summary__item">
+                <span class="assign-summary__count" id="sum-broll-count">0</span>
+                <span class="assign-summary__label">B-Roll</span>
+              </div>
+              <div class="assign-summary__item">
+                <span class="assign-summary__count" id="sum-interview-count">0</span>
+                <span class="assign-summary__label">entrevistas</span>
+              </div>
+            </div>
+
+            <!-- Áudio encontrado -->
+            <div id="audio-section" class="assign-section hidden">
+              <div class="assign-section__header">
+                <span class="assign-section__title">&#9834; Áudio</span>
+                <span id="audio-count" class="count-pill">0</span>
+              </div>
+              <div id="audio-items" class="assign-list"></div>
+            </div>
+
+            <!-- Vídeo encontrado -->
+            <div id="video-section" class="assign-section hidden">
+              <div class="assign-section__header">
+                <span class="assign-section__title">&#9654; Vídeo</span>
+                <span id="video-count" class="count-pill">0</span>
+              </div>
+              <div id="video-items" class="assign-list"></div>
+            </div>
+
+          </div><!-- /assign-panel -->
+
+          <!-- Separador -->
+          <div class="divider-or">ou adicionar da pasta</div>
+
+          <!-- MODO SECUNDÁRIO: file picker (requer permissão) -->
+          <div class="media-block media-block--secondary">
             <div class="media-block__header">
-              <span class="media-block__icon">&#9834;</span>
-              <span class="media-block__title">Música principal</span>
-              <span class="media-block__req">obrigatório</span>
+              <span class="media-block__title">Selecionar arquivos da pasta</span>
+            </div>
+            <div class="ph-notice">
+              Requer permissão <code>localFileSystem</code> no manifest e pode não funcionar em todas as versões do Premiere Pro. Use o scan acima como alternativa.
             </div>
             <button id="btn-select-music" class="btn btn--outline btn--sm btn--block">
-              + Selecionar arquivo de áudio
+              &#9834; Música da pasta
             </button>
             <div id="music-info" class="music-card hidden">
               <span class="music-card__icon">&#9834;</span>
@@ -74,59 +130,16 @@
               </div>
               <button id="btn-remove-music" class="icon-btn" title="Remover">&#10005;</button>
             </div>
-          </div>
-
-          <!-- B-Roll -->
-          <div class="media-block">
-            <div class="media-block__header">
-              <span class="media-block__icon">&#9646;</span>
-              <span class="media-block__title">Clipes B-Roll</span>
-              <span class="media-block__req">obrigatório</span>
-              <span id="broll-count" class="count-pill hidden"></span>
-            </div>
             <button id="btn-select-broll" class="btn btn--outline btn--sm btn--block">
-              + Adicionar clipes
+              &#9654; B-Roll da pasta
             </button>
             <div id="broll-list" class="flist"></div>
-          </div>
-
-          <!-- Entrevistas -->
-          <div class="media-block">
-            <div class="media-block__header">
-              <label class="toggle-label">
-                <input type="checkbox" id="chk-interviews" class="toggle-input" />
-                <span class="toggle-track"></span>
-                <span class="media-block__title">Entrevistas / falas</span>
-              </label>
-              <span class="media-block__req opt">opcional</span>
-              <span id="interview-count" class="count-pill hidden"></span>
-            </div>
-            <div id="interview-section" class="hidden">
-              <button id="btn-select-interviews" class="btn btn--outline btn--sm btn--block">
-                + Selecionar entrevistas
-              </button>
-              <div id="interview-list" class="flist"></div>
-            </div>
-          </div>
-
-          <!-- Assets gráficos -->
-          <div class="media-block">
-            <div class="media-block__header">
-              <label class="toggle-label">
-                <input type="checkbox" id="chk-assets" class="toggle-input" />
-                <span class="toggle-track"></span>
-                <span class="media-block__title">Assets gráficos</span>
-              </label>
-              <span class="media-block__req opt">opcional</span>
-              <span id="asset-count" class="count-pill hidden"></span>
-            </div>
-            <div id="asset-section" class="hidden">
-              <div class="ph-notice">Importação suportada. Inserção automática é placeholder — posicione manualmente após gerar.</div>
-              <button id="btn-select-assets" class="btn btn--outline btn--sm btn--block">
-                + Logo, título, lower thirds
-              </button>
-              <div id="asset-list" class="flist"></div>
-            </div>
+            <span id="broll-count" class="count-pill hidden"></span>
+            <button id="btn-select-interviews" class="btn btn--outline btn--sm btn--block">
+              &#127908; Entrevistas da pasta
+            </button>
+            <div id="interview-list" class="flist"></div>
+            <span id="interview-count" class="count-pill hidden"></span>
           </div>
 
           <!-- Total badge -->

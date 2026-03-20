@@ -207,6 +207,185 @@ body {
 .step-error.hidden { display: none; }
 
 /* --------------------------------------------------------------------------
+   Scan intro
+   -------------------------------------------------------------------------- */
+.scan-intro {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-bottom: 6px;
+}
+
+.scan-intro__title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-1);
+}
+
+.scan-intro__hint {
+  font-size: 11px;
+  color: var(--text-3);
+  line-height: 1.4;
+}
+
+.scan-status {
+  font-size: 11px;
+  color: var(--text-3);
+  text-align: center;
+  padding: 2px 0;
+}
+
+/* --------------------------------------------------------------------------
+   Assign panel — lista de itens do projeto para categorização
+   -------------------------------------------------------------------------- */
+.assign-summary {
+  display: flex;
+  gap: 6px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 10px;
+  flex-wrap: wrap;
+}
+
+.assign-summary__item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+  min-width: 70px;
+}
+
+.assign-summary__icon--music { color: var(--gold); font-size: 13px; }
+
+.assign-summary__count {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--gold);
+  min-width: 18px;
+  text-align: center;
+}
+
+.assign-summary__name {
+  font-size: 10px;
+  color: var(--text-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 80px;
+}
+
+.assign-summary__label {
+  font-size: 10px;
+  color: var(--text-3);
+}
+
+/* Assign section (áudio / vídeo) */
+.assign-section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.assign-section__header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 0;
+}
+
+.assign-section__title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-2);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+/* Assign list + entries */
+.assign-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.assign-entry {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 5px 7px;
+}
+
+.assign-entry--active-music     { border-color: var(--gold); background: rgba(212,168,67,0.08); }
+.assign-entry--active-broll     { border-color: #e08040; background: rgba(224,128,64,0.07); }
+.assign-entry--active-interview { border-color: #d060a0; background: rgba(208,96,160,0.07); }
+
+.assign-entry__name {
+  flex: 1;
+  font-size: 11px;
+  color: var(--text-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.assign-entry__btns {
+  display: flex;
+  gap: 3px;
+  flex-shrink: 0;
+}
+
+/* Role buttons inside each assign entry */
+.role-btn {
+  border: 1px solid var(--border-2);
+  border-radius: 3px;
+  background: var(--surface-3);
+  color: var(--text-3);
+  font-size: 10px;
+  cursor: pointer;
+  padding: 2px 5px;
+  font-family: var(--font);
+  white-space: nowrap;
+}
+
+.role-btn:hover { border-color: var(--text-3); color: var(--text-2); }
+
+.role-btn--music.active     { background: rgba(212,168,67,0.2); border-color: var(--gold);  color: var(--gold); }
+.role-btn--broll.active     { background: rgba(224,128,64,0.2); border-color: #e08040;      color: #e08040; }
+.role-btn--interview.active { background: rgba(208,96,160,0.2); border-color: #d060a0;      color: #d060a0; }
+.role-btn--skip.active      { background: rgba(100,100,100,0.2); border-color: var(--text-3); color: var(--text-3); }
+
+/* Divider */
+.divider-or {
+  text-align: center;
+  font-size: 10px;
+  color: var(--text-3);
+  position: relative;
+  padding: 4px 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  margin: 2px 0;
+}
+
+/* Secondary block (file picker) */
+.media-block--secondary {
+  opacity: 0.7;
+}
+
+.media-block--secondary code {
+  font-size: 10px;
+  background: var(--surface-3);
+  padding: 1px 4px;
+  border-radius: 2px;
+  color: var(--text-2);
+}
+
+/* --------------------------------------------------------------------------
    Media blocks (Step 1)
    -------------------------------------------------------------------------- */
 .media-block {

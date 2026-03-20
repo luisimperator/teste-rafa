@@ -89,14 +89,37 @@ const CLIP_LABELS = {
 // Estado da aplicação
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Helpers de tipo de item de mídia
+// Funciona tanto com UXP File (file picker) quanto com ProjectItem (scan)
+// ---------------------------------------------------------------------------
+
+function getItemName(item) {
+  if (!item) return '';
+  // ProjectItem: tem .name direto
+  // UXP File: também tem .name, com fallback para nativePath
+  return item.name || (item.nativePath ? item.nativePath.split(/[\\/]/).pop() : '');
+}
+
+function isProjectItem(item) {
+  // ProjectItem: tem .type numérico e sem .nativePath
+  return item && typeof item.type === 'number' && !item.nativePath;
+}
+
+// ---------------------------------------------------------------------------
+// Estado da aplicação
+// ---------------------------------------------------------------------------
+
 const AppState = {
   step: 1,
 
   // — Mídia —
-  music:        null,       // UXP File
-  broll:        [],         // UXP File[]
-  interviews:   [],         // UXP File[]
-  assets:       [],         // UXP File[] (logo, título, etc.)
+  // Cada slot aceita UXP File (do file picker) OU ProjectItem (do scan).
+  // Use getItemName(item) para o nome em qualquer caso.
+  music:        null,       // File | ProjectItem
+  broll:        [],         // (File | ProjectItem)[]
+  interviews:   [],         // (File | ProjectItem)[]
+  assets:       [],         // (File | ProjectItem)[]
   hasInterviews: false,
   hasAssets:     false,
 

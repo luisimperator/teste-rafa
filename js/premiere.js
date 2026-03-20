@@ -263,6 +263,54 @@ function createEndCardMarker(sequence, timeSec, text) {
 }
 
 // ---------------------------------------------------------------------------
+// Escaneamento do painel do projeto
+// Lê todos os itens de clip (tipo 1 ou 4) do painel do projeto recursivamente.
+// Esta é a forma recomendada de selecionar mídia no Premiere Pro UXP,
+// pois não depende de permissão de localFileSystem.
+// ---------------------------------------------------------------------------
+
+const AUDIO_EXT = new Set(['mp3','wav','aac','m4a','aif','aiff','ogg','flac','wma']);
+const VIDEO_EXT = new Set(['mp4','mov','avi','mxf','r3d','braw','mkv','mpg','mpeg','m2v','dv']);
+
+function _guessMediaType(name) {
+  const ext = (name || '').split('.').pop().toLowerCase();
+  if (AUDIO_EXT.has(ext)) return 'audio';
+  if (VIDEO_EXT.has(ext)) return 'video';
+  return 'other';
+}
+
+async function scanProjectItems(project) {
+  const items = [];
+
+  function collect(bin) {
+    const children = _getChildren(bin);
+    for (const child of children) {
+      // type 2 = bin/folder — recurse
+      if (child.type === 2) {
+        collect(child);
+      } else if (child.name && child.name.trim()) {
+        const mediaType = _guessMediaType(child.name);
+        if (mediaType !== 'other') {
+          items.push({ item: child, name: child.name, mediaType });
+        }
+      }
+    }
+  }
+
+  collect(project.rootItem);
+  Log.ok('Projeto escaneado: ' + items.length + ' item(s) de mídia encontrado(s).');
+  return items;
+}
+
+/**
+ * Verifica se um objeto é um ProjectItem (vem do scan) ou um File (vem do picker).
+ * ProjectItem tem propriedade `type` numérica; File tem `nativePath`.
+ */
+function isProjectItem(obj) {
+  return obj && typeof obj.type === 'number' && !obj.nativePath;
+}
+
+// ---------------------------------------------------------------------------
 // Exporta funções como propriedades do objeto PremierePro
 // (acessível globalmente pelos outros módulos)
 // ---------------------------------------------------------------------------
@@ -271,6 +319,8 @@ const PremierePro = {
   getProject,
   importPaths,
   findProjectItem,
+  scanProjectItems,
+  isProjectItem,
   createSequence,
   insertMusic,
   prepareVideoTracks,

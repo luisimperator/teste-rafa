@@ -44,36 +44,41 @@ async function generateRoughCut() {
     const project = await PremierePro.getProject();
     Log.ok('Projeto: ' + (project.name || 'sem nome'));
 
-    // 2. Importação de arquivos
-    setProgress(8, 'Importando mídia...');
-    const paths = [AppState.music.nativePath];
-    AppState.broll.forEach((f)      => paths.push(f.nativePath));
-    AppState.interviews.forEach((f) => paths.push(f.nativePath));
-    AppState.assets.forEach((f)     => paths.push(f.nativePath));
-    await PremierePro.importPaths(project, paths);
+    // 2. Importação — só executa se os itens vieram do file picker (têm nativePath)
+    //    Se vieram do scan do projeto, já são ProjectItems e não precisam de import.
+    setProgress(8, 'Verificando mídia...');
 
-    // 3. Localiza itens no projeto
-    setProgress(18, 'Localizando clipes no projeto...');
-    const musicItem = await PremierePro.findProjectItem(project, getFileName(AppState.music));
-    if (!musicItem) throw new Error(
-      'Música não encontrada no projeto após importação: ' + getFileName(AppState.music)
-    );
+    async function resolveItem(item) {
+      if (PremierePro.isProjectItem(item)) return item; // já é ProjectItem
+      // É um File — importa e localiza no projeto
+      if (item.nativePath) {
+        try { project.importFiles([item.nativePath], true, project.rootItem, false); } catch (_) {}
+        await new Promise((r) => setTimeout(r, 800));
+        return await PremierePro.findProjectItem(project, getFileName(item));
+      }
+      return null;
+    }
 
+    const musicItem = await resolveItem(AppState.music);
+    if (!musicItem) throw new Error('Música não encontrada no projeto: ' + getFileName(AppState.music));
+    Log.ok('Música: ' + getFileName(AppState.music));
+
+    setProgress(18, 'Localizando clipes B-Roll...');
     const brollItems = [];
     for (const f of AppState.broll) {
-      const item = await PremierePro.findProjectItem(project, getFileName(f));
+      const item = await resolveItem(f);
       if (item) brollItems.push(item);
       else Log.warn('B-Roll não localizado: ' + getFileName(f));
     }
-    if (brollItems.length === 0) throw new Error('Nenhum clipe B-Roll foi localizado no projeto.');
+    if (brollItems.length === 0) throw new Error('Nenhum clipe B-Roll disponível. Atribua clipes de vídeo como B-Roll na Etapa 1.');
 
     const interviewItems = [];
-    if (AppState.useInterviews) {
+    if (AppState.useInterviews && AppState.interviews.length > 0) {
       for (const f of AppState.interviews) {
-        const item = await PremierePro.findProjectItem(project, getFileName(f));
+        const item = await resolveItem(f);
         if (item) interviewItems.push(item);
       }
-      Log.info('Entrevistas localizadas: ' + interviewItems.length);
+      Log.info('Entrevistas: ' + interviewItems.length);
     }
 
     // 4. Cria sequência
@@ -166,13 +171,45 @@ document.addEventListener('DOMContentLoaded', () => {
   // STEP 1 — Mídia
   // =========================================================================
 
-  // Música
+  // — Scan do painel do projeto (modo primário) —
+  $('btn-scan-project').addEventListener('click', async () => {
+    const btn    = $('btn-scan-project');
+    const status = $('scan-status');
+    btn.disabled = true;
+    if (status) { status.textContent = 'Escaneando...'; show('scan-status'); }
+
+    // Limpa atribuições anteriores ao re-escanear
+    AppState.music      = null;
+    AppState.broll      = [];
+    AppState.interviews = [];
+
+    try {
+      const project = await PremierePro.getProject();
+      const scanned = await PremierePro.scanProjectItems(project);
+
+      if (scanned.length === 0) {
+        if (status) status.textContent = 'Nenhum item de mídia encontrado. Importe arquivos no Premiere primeiro.';
+        Log.warn('Projeto sem itens de mídia (vídeo/áudio). Importe os clipes pelo menu Arquivo → Importar.');
+      } else {
+        if (status) status.textContent = scanned.length + ' item(s) encontrado(s).';
+        renderAssignPanel(scanned);
+        Log.ok(scanned.length + ' item(s) escaneado(s) do projeto.');
+      }
+    } catch (err) {
+      if (status) status.textContent = 'Erro: ' + err.message;
+      Log.error('Scan falhou: ' + err.message);
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  // — File picker (modo secundário — fallback) —
   $('btn-select-music').addEventListener('click', async () => {
     const file = await pickFile(['mp3', 'wav', 'aac', 'm4a', 'aif', 'aiff', 'ogg']);
     if (!file) return;
     AppState.music = file;
     updateMusicUI();
-    Log.info('Música selecionada: ' + getFileName(file) + ' (' + Analysis.formatBytes(file.size) + ')');
+    Log.info('Música (pasta): ' + getFileName(file));
   });
 
   $('btn-remove-music').addEventListener('click', () => {
@@ -181,9 +218,8 @@ document.addEventListener('DOMContentLoaded', () => {
     updateMusicUI();
   });
 
-  // B-Roll
   $('btn-select-broll').addEventListener('click', async () => {
-    const files = await pickFiles(['mp4', 'mov', 'avi', 'mxf', 'r3d', 'braw', 'mkv', 'mp2', 'mpg']);
+    const files = await pickFiles(['mp4', 'mov', 'avi', 'mxf', 'r3d', 'braw', 'mkv', 'mpg']);
     if (!files || files.length === 0) return;
     const existing = new Set(AppState.broll.map(getFileName));
     let added = 0;
@@ -191,14 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!existing.has(getFileName(f))) { AppState.broll.push(f); added++; }
     });
     updateBrollUI();
-    Log.info(added + ' clipe(s) B-Roll adicionado(s). Total: ' + AppState.broll.length);
-  });
-
-  // Entrevistas
-  $('chk-interviews').addEventListener('change', (e) => {
-    AppState.hasInterviews = e.target.checked;
-    AppState.useInterviews = e.target.checked;
-    e.target.checked ? show('interview-section') : hide('interview-section');
+    Log.info(added + ' B-Roll da pasta adicionado(s). Total: ' + AppState.broll.length);
   });
 
   $('btn-select-interviews').addEventListener('click', async () => {
@@ -209,27 +238,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!existing.has(getFileName(f))) AppState.interviews.push(f);
     });
     updateInterviewUI();
-    Log.info(AppState.interviews.length + ' entrevista(s) carregada(s).');
-  });
-
-  // Assets gráficos
-  $('chk-assets').addEventListener('change', (e) => {
-    AppState.hasAssets = e.target.checked;
-    e.target.checked ? show('asset-section') : hide('asset-section');
-    if (e.target.checked) {
-      Log.ph('Assets gráficos: importação suportada, mas inserção automática na timeline é PLACEHOLDER.');
-    }
-  });
-
-  $('btn-select-assets').addEventListener('click', async () => {
-    const files = await pickFiles(['png', 'jpg', 'jpeg', 'svg', 'ai', 'eps', 'pdf', 'psd', 'mogrt']);
-    if (!files || files.length === 0) return;
-    const existing = new Set(AppState.assets.map(getFileName));
-    files.forEach((f) => {
-      if (!existing.has(getFileName(f))) AppState.assets.push(f);
-    });
-    updateAssetUI();
-    Log.ph('Assets importados para referência. Inserção automática pendente de implementação.');
+    Log.info('Entrevistas da pasta: ' + AppState.interviews.length);
   });
 
   // =========================================================================
