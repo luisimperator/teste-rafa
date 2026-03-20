@@ -8,8 +8,8 @@
     "app": "premierepro",
     "minVersion": "26.0.2"
   },
-  "requiredPermissions": {
-    "localFileSystem": "request"
+  "permissions": {
+    "localFileSystem": "fullAccess"
   },
   "entrypoints": [
     {
