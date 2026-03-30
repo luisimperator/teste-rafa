@@ -55,8 +55,39 @@ function _sleep(ms) {
 // ---------------------------------------------------------------------------
 
 async function getProject() {
-  const project = await ppro.app.getActiveProject();
-  if (!project) throw new Error('Nenhum projeto aberto no Premiere Pro.');
+  // Diagnóstico: loga o que o módulo 'premierepro' expõe nessa versão
+  try {
+    const keys = Object.keys(ppro || {});
+    Log.debug('[ppro] keys: ' + (keys.length ? keys.join(', ') : '(nenhum)'));
+    Log.debug('[ppro] typeof ppro: ' + typeof ppro);
+    Log.debug('[ppro] typeof ppro.app: ' + typeof ppro.app);
+    Log.debug('[ppro] typeof ppro.App: ' + typeof ppro.App);
+  } catch (diagErr) {
+    Log.debug('[ppro] diagnóstico falhou: ' + diagErr.message);
+  }
+
+  // Tenta diferentes padrões de acesso conforme versão do Premiere Pro UXP
+  let project;
+
+  if (ppro && ppro.app && typeof ppro.app.getActiveProject === 'function') {
+    // Padrão: ppro.app.getActiveProject()  (documentação oficial)
+    project = await ppro.app.getActiveProject();
+  } else if (ppro && typeof ppro.getActiveProject === 'function') {
+    // Alternativa: ppro é o app diretamente
+    project = await ppro.getActiveProject();
+  } else if (ppro && ppro.App && typeof ppro.App.getActiveProject === 'function') {
+    // Alternativa: ppro.App (capitalizado)
+    project = await ppro.App.getActiveProject();
+  } else {
+    const keys = ppro ? Object.keys(ppro).join(', ') : 'módulo não carregado';
+    throw new Error(
+      'API do Premiere Pro não reconhecida. Chaves disponíveis: [' + keys + ']. ' +
+      'Reporte isso para ajuste da integração.'
+    );
+  }
+
+  if (!project) throw new Error('Nenhum projeto aberto no Premiere Pro. Abra ou crie um projeto.');
+  Log.debug('[ppro] projeto obtido: ' + (project.name || '(sem nome)'));
   return project;
 }
 
