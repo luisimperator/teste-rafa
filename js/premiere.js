@@ -20,7 +20,9 @@
 
 'use strict';
 
-const ppro = require('premierepro');
+// require('premierepro') exporta { app, ... }
+// app.Project.getActiveProject() é a API correta para PP 25/26
+const { app: ppro } = require('premierepro');
 
 // ---------------------------------------------------------------------------
 // Helpers internos
@@ -55,14 +57,7 @@ function _sleep(ms) {
 // ---------------------------------------------------------------------------
 
 async function getProject() {
-  // Verifica se ppro.Project está disponível (requer apiVersion:2 no manifest)
-  if (!ppro || !ppro.Project) {
-    const keys = ppro ? Object.keys(ppro).join(', ') || '(vazio)' : 'módulo não carregado';
-    throw new Error(
-      'ppro.Project indisponível — chaves do módulo: [' + keys + ']. ' +
-      'Verifique se o manifest tem "data":{"apiVersion":2} no host.'
-    );
-  }
+  if (!ppro) throw new Error('Módulo premierepro não disponível (ppro.app é undefined). Verifique o manifest.');
   const project = await ppro.Project.getActiveProject();
   if (!project) throw new Error('Nenhum projeto aberto no Premiere Pro.');
   return project;

@@ -183,21 +183,6 @@ document.addEventListener('DOMContentLoaded', () => {
     AppState.broll      = [];
     AppState.interviews = [];
 
-    // — Diagnóstico do módulo premierepro —
-    let _diagText = '?';
-    try {
-      const _m = require('premierepro');
-      const _keys = _m ? Object.keys(_m).join(', ') || '(vazio)' : 'undefined';
-      const _hasPrj = _m && _m.Project ? 'sim' : 'não';
-      const _hasApp = _m && _m.app ? 'sim' : 'não';
-      _diagText = 'ppro keys:[' + _keys + '] .Project=' + _hasPrj + ' .app=' + _hasApp;
-    } catch (_diagErr) {
-      _diagText = 'require falhou: ' + _diagErr.message;
-    }
-    // Mostra no title do botão para sobreviver a qualquer catch
-    btn.title = _diagText;
-    if (status) { status.textContent = _diagText; show('scan-status'); }
-
     try {
       const project = await PremierePro.getProject();
       const scanned = await PremierePro.scanProjectItems(project);
