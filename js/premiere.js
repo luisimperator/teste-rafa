@@ -55,35 +55,17 @@ function _sleep(ms) {
 // ---------------------------------------------------------------------------
 
 async function getProject() {
-  // Diagnóstico inline: mostra o que o módulo 'premierepro' exporta
-  let keys = '(falhou ao listar)';
-  try { keys = Object.keys(ppro || {}).join(', ') || '(vazio)'; } catch (_) {}
-
-  if (ppro && ppro.app && typeof ppro.app.getActiveProject === 'function') {
-    const project = await ppro.app.getActiveProject();
+  try {
+    const project = await ppro.Project.getActiveProject();
     if (!project) throw new Error('Nenhum projeto aberto no Premiere Pro.');
     return project;
+  } catch (err) {
+    if (err.message && err.message.includes('Nenhum projeto')) throw err;
+    throw new Error(
+      'Falha ao acessar o projeto: ' + err.message +
+      ' (PP ' + (ppro && ppro.version ? ppro.version : '?') + ')'
+    );
   }
-
-  if (ppro && typeof ppro.getActiveProject === 'function') {
-    // ppro é o app diretamente
-    const project = await ppro.getActiveProject();
-    if (!project) throw new Error('Nenhum projeto aberto no Premiere Pro.');
-    return project;
-  }
-
-  if (ppro && ppro.App && typeof ppro.App.getActiveProject === 'function') {
-    const project = await ppro.App.getActiveProject();
-    if (!project) throw new Error('Nenhum projeto aberto no Premiere Pro.');
-    return project;
-  }
-
-  // Nenhuma das alternativas funcionou — reporta o que está disponível
-  throw new Error(
-    'API do Premiere Pro não reconhecida nesta versão. ' +
-    'Chaves do módulo: [' + keys + ']. ' +
-    'Reporte isso para corrigir a integração.'
-  );
 }
 
 // ---------------------------------------------------------------------------
