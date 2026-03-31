@@ -6,7 +6,8 @@
   "manifestVersion": 5,
   "host": {
     "app": "premierepro",
-    "minVersion": "26.0.2"
+    "minVersion": "26.0.2",
+    "data": { "apiVersion": 2 }
   },
   "permissions": {
     "localFileSystem": "fullAccess"

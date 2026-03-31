@@ -55,17 +55,17 @@ function _sleep(ms) {
 // ---------------------------------------------------------------------------
 
 async function getProject() {
-  try {
-    const project = await ppro.Project.getActiveProject();
-    if (!project) throw new Error('Nenhum projeto aberto no Premiere Pro.');
-    return project;
-  } catch (err) {
-    if (err.message && err.message.includes('Nenhum projeto')) throw err;
+  // Verifica se ppro.Project está disponível (requer apiVersion:2 no manifest)
+  if (!ppro || !ppro.Project) {
+    const keys = ppro ? Object.keys(ppro).join(', ') || '(vazio)' : 'módulo não carregado';
     throw new Error(
-      'Falha ao acessar o projeto: ' + err.message +
-      ' (PP ' + (ppro && ppro.version ? ppro.version : '?') + ')'
+      'ppro.Project indisponível — chaves do módulo: [' + keys + ']. ' +
+      'Verifique se o manifest tem "data":{"apiVersion":2} no host.'
     );
   }
+  const project = await ppro.Project.getActiveProject();
+  if (!project) throw new Error('Nenhum projeto aberto no Premiere Pro.');
+  return project;
 }
 
 // ---------------------------------------------------------------------------
